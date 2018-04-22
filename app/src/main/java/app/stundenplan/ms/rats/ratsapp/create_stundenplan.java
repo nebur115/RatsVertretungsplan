@@ -56,7 +56,7 @@ public class create_stundenplan extends AppCompatActivity {
             grade_woche_button.setVisibility(View.GONE);
             UngradeWoche = null;
             Woche.setVisibility(View.GONE);
-            ft.add(R.id.stundenplan_create_framelayout, GradeWoche)
+            ft.add(R.id.stundenplan_create_framelayout, GradeWoche);
         }
         else
         {
