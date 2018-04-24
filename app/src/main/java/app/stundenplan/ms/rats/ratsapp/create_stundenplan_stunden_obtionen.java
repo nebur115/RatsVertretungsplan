@@ -41,7 +41,6 @@ public class create_stundenplan_stunden_obtionen  extends AppCompatActivity {
     int pos;
     int Stunde;
     private List<Memory_Stunde> WocheBStundenListe = new ArrayList<>();
-
     int orgStunde;
     int orgPos;
     Boolean wasDopellstunde = false;
@@ -253,6 +252,7 @@ public class create_stundenplan_stunden_obtionen  extends AppCompatActivity {
 
         List<String> Wochenwiederholung = new ArrayList<String>();
 
+        if(zweiWöchentlich){
         if(pos<MaxStunden*5-5){
             if(!(MemoryStundenListe.get(pos-5).isFreistunde()) && ((!eDoppelstunde.isChecked() && MemoryStundenListe.get(pos-5).getFach().equals(WocheBStundenListe.get(pos-5).getFach())) ||(eDoppelstunde.isChecked() && MemoryStundenListe.get(pos-5).getFach().equals(WocheBStundenListe.get(pos-5).getFach())&& MemoryStundenListe.get(pos).getFach().equals(WocheBStundenListe.get(pos).getFach())))){
                 wasWöchentlich = true;
@@ -265,7 +265,7 @@ public class create_stundenplan_stunden_obtionen  extends AppCompatActivity {
         }else{
             Wochenwiederholung.add("Alle 2 Wochen");
             Wochenwiederholung.add("Jede Woche");
-        }
+        }}
 
 
         hinweis = false;
@@ -378,7 +378,7 @@ public class create_stundenplan_stunden_obtionen  extends AppCompatActivity {
         MündlichSchrifltlichAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 
-        ArrayAdapter WiederholungApapter = new ArrayAdapter(getBaseContext(),R.layout.spinner_item,Wochenwiederholung);
+        final ArrayAdapter WiederholungApapter = new ArrayAdapter(getBaseContext(),R.layout.spinner_item,Wochenwiederholung);
         WiederholungApapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         sHalle.setAdapter(HalleAdapter);
@@ -440,32 +440,36 @@ public class create_stundenplan_stunden_obtionen  extends AppCompatActivity {
                 SharedPreferences settings = getSharedPreferences("RatsVertretungsPlanApp", 0);
                 Gson gson = new Gson();
                 String json = settings.getString("Stundenliste", null);
+                String bjson = settings.getString("Stundenliste", null);
                 Type type = new TypeToken<ArrayList<Memory_Stunde>>() {}.getType();
                 MemoryStundenListe = gson.fromJson(json , type);
-
+                WocheBStundenListe = gson.fromJson(bjson, type);
 
                 MemoryStundenListe.set(pos-5, new Memory_Stunde(true,  "", "", "", "", "", 0, false, 0,null));
+                WocheBStundenListe.set(pos-5, new Memory_Stunde(true,  "", "", "", "", "", 0, false, 0,null));
+
+
 
                 if(Doppelstunde){
                     MemoryStundenListe.set(pos, new Memory_Stunde(true,  "", "", "", "", "",0, false,0,null));
+                    WocheBStundenListe.set(pos, new Memory_Stunde(true,  "", "", "", "", "",0, false,0,null));
                 }
                 SharedPreferences.Editor editor = settings.edit();
-                String json2 = gson.toJson( MemoryStundenListe);
-
-
+                String jsona = gson.toJson( MemoryStundenListe);
+                String jsonb = gson.toJson(WocheBStundenListe);
 
 
                 if(Wiederholung=="Jede Woche") {
-                    editor.putString("Stundenliste", json2);
-                    editor.putString("WocheBStundenListe", json2);
+                    editor.putString("Stundenliste", jsona);
+                    editor.putString("WocheBStundenListe", jsonb);
                 }
                 else{
 
                     if(Woche==1){
-                        editor.putString("Stundenliste", json2);
+                        editor.putString("Stundenliste", jsona);
                     }
                     else{
-                        editor.putString("WocheBStundenListe", json2);
+                        editor.putString("WocheBStundenListe",  jsonb);
                     }
                 }
 
@@ -494,7 +498,12 @@ public class create_stundenplan_stunden_obtionen  extends AppCompatActivity {
                 Bewertung = MündlichSchriftlichSpinner.getSelectedItem().toString();
                 Lehrer = eLehrer.getText().toString();
                 Doppelstunde = eDoppelstunde.isChecked();
-                Wiederholung = WiederholungsSpinner.getSelectedItem().toString();
+                if(zweiWöchentlich){
+                    Wiederholung = WiederholungsSpinner.getSelectedItem().toString();
+                }else{
+                    Wiederholung = "Alle 2 Wochen";
+                }
+
                 StartJahr = Integer.parseInt("0"+eUnterichtbegin.getText().toString());
                 Schriftlich = false;
 
@@ -614,6 +623,7 @@ public class create_stundenplan_stunden_obtionen  extends AppCompatActivity {
             }
         }
 
+
         if ((Stufe.equals("EF") || Stufe.equals("Q1") || Stufe.equals("Q2"))){
             Kursnummer = Integer.parseInt(eKursnummer.getText().toString());
         }
@@ -636,6 +646,16 @@ public class create_stundenplan_stunden_obtionen  extends AppCompatActivity {
 
 
         MemoryStundenListe = gson.fromJson(json , type);
+
+
+        if(fach.equals("Sport")){
+            if(sHalle.getSelectedItem().toString().equals("kleine Halle")) {
+                Raum = "kl H";
+            }
+            else{
+                Raum = "gr H";
+            }
+        }
 
         switch (fach){
             case "Deutsch":
